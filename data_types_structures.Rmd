@@ -1,0 +1,199 @@
+---
+title: "R data types and structures"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r setup}
+# set the working path
+    knitr::opts_knit$set(root.dir = normalizePath("/Users/sherrybhalla/projects/computational_biology_course/datasets")) 
+```
+
+```{r}
+# get to know the working directory
+getwd()
+```
+
+
+```{r}
+
+#Reading data into R
+# install package and read file
+#install.packages("tidyverse")
+library("tidyverse")
+typesdata <- read_csv("typesdata.csv")
+spec(typesdata)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+# colon between two numbers creates a sequence
+1001:1017
+```
+```{r}
+# variable types 
+#continuous (numbers), in R: numeric, double, or integer;
+#categorical, in R: character, factor, or logical (TRUE/FALSE);  #date/time, in R: POSIXct date-time3.
+typesdata_faulty <- read_csv("typesdata_faulty.csv")
+spec(typesdata_faulty)
+```
+```{r}
+library(tidyverse) 
+typesdata %>%
+count(group)
+```
+```{r}
+typesdata %>%
+count(group, sort = TRUE)
+```
+```{r}
+library(lubridate)
+current_datetime <- Sys.time()
+current_datetime
+
+my_datetime <- "2020-12-01 12:00"
+my_datetime
+
+current_datetime - my_datetime
+
+current_datetime %>% class()
+my_datetime %>% class()
+my_datetime_converted <- ymd_hm(my_datetime)
+my_datetime_converted %>% class()
+
+ current_datetime - my_datetime_converted
+```
+```{r}
+
+
+```
+
+```{r}
+# pipe and dot
+#two fundamental concepts  - objects and functions
+
+
+mean(typesdata$measurement)
+typesdata$measurement %>% mean()
+# ctrl +shift + m (add pipe sign)
+
+
+```
+```{r}
+#Operators for filtering data
+typesdata %>% filter(group=="Treatment")
+typesdata %>% filter(group!="Treatment")
+typesdata %>% filter(measurement > 2)
+typesdata %>% filter(measurement > 2 & group =="Treatment"|group =="Control")
+typesdata %>% filter(measurement > 3.7)
+typesdata %>% filter(measurement >= 3.7)
+```
+```{r}
+typesdata$group %>% unique()
+```
+```{r}
+## create new columns mutate function
+typesdata %>% mutate(measurement/2)
+typesdata %>% mutate(measurement_half = measurement/2)
+typesdata_modified=typesdata %>% mutate(measurement_half = measurement/2)
+```
+
+```{r}
+library(lubridate) 
+typesdata %>%
+mutate(reference_date = ymd_hm("2020-01-01 12:00"), dates_difference = reference_date - date) %>%
+select(date, reference_date, dates_difference)
+```
+```{r}
+typesdata %>%
+mutate(mean_measurement = mean(measurement))
+
+typesdata %>%
+mutate(mean_measurement = mean(measurement)) %>% mutate(measurement_relative = measurement/mean_measurement) %>% select(matches("measurement"))
+```
+
+```{r}
+#Conditional calculations - if_else()
+typesdata %>%
+mutate(above_threshold = if_else(measurement > 3,
+                                   "Above three",
+                                   "Below three"))
+```
+
+```{r}
+#Joining multiple datasets
+library(tidyverse)
+patientdata <- read_csv("./datasets/patient_data.csv")
+patientdata
+
+labsdata <- read_csv("./datasets/labs_data.csv")
+labsdata
+
+```
+```{r}
+full_join(patientdata, labsdata)
+```
+```{r}
+inner_join(patientdata, labsdata)
+```
+```{r}
+left_join(patientdata, labsdata)
+```
+```{r}
+ #left_join(data1, data2, by = c("id" = "patient_id"))
+patientdata_new <- read_csv("patient_data_updated.csv")
+patientdata_new
+```
+```{r}
+bind_rows(patientdata, patientdata_new)
+```
+
+```{r}
+labsdata_updated <- labsdata %>% add_row(id = 5, measurement = 2.49)
+labsdata_updated
+```
+```{r}
+# R functions
+# Function to find the maximum of two numbers
+find_maximum <- function(a, b) {
+  if (a > b) {
+    return(a)
+  } else {
+    return(b)
+  }
+}
+
+# Example usage
+result <- find_maximum(8, 5)
+print(paste("The maximum of 8 and 5 is:", result))
+
+```
+```{r}
+# Create a data frame with a numeric and a factor column
+data <- data.frame(
+  NumericColumn = c(1, 2, 3, 4, 5),
+  FactorColumn = as.factor(c("Low", "Medium", "High", "Low", "Medium"))
+)
+
+# Mixing numeric and factor columns
+mixed_data <- cbind(data$NumericColumn, data$FactorColumn)
+class(mixed_data[,2])
+mixed_data <- as.data.frame(cbind(data$NumericColumn, data$FactorColumn))
+data <- data.frame(
+  NumericColumn = c(1, 2, 3, 4, 5),
+  FactorColumn = as.character(c("Low", "Medium", "High", "Low", "Medium"))
+)
+mixed_data <- cbind(data$NumericColumn, data$FactorColumn)
+class(mixed_data)
+mixed_data=as.data.frame(mixed_data)
+mixed_data$V2= as.factor(mixed_data$V2)
+```
+
