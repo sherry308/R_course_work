@@ -1,0 +1,172 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+# set the working path
+    knitr::opts_knit$set(root.dir = normalizePath("/Users/sherrybhalla/projects/computational_biology_course/datasets")) 
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+setwd("/Users/sherrybhalla/projects/computational_biology_course/datasets")
+
+library("tidyverse")
+gbd_long <- read_csv("global_burden_disease_cause-year-gender-income.csv")
+view(gbd_long)
+#how the number of deaths has changed from 1990 to 2017
+?pivot_wider
+gbd_long %>% pivot_wider(names_from = year, values_from = deaths_millions)
+```
+
+
+```{r}
+gbd_long %>%
+pivot_wider(names_from = Gender, values_from = deaths_millions) %>% mutate(Differene= Male - Female)
+```
+```{r}
+a=gbd_long %>%
+pivot_wider(names_from = c(Gender,year,income), values_from = deaths_millions)
+view(a)
+```
+
+```{r}
+
+gbd_wide =read_csv("global_burden_disease_wide-format.csv") 
+view(gbd_wide)
+#?pivot_longer
+gbd_wide %>% pivot_longer(matches("Female|Male"),
+names_to = "Gender_year",
+values_to = "deaths_millions") %>%
+  slice(1:6)
+
+```
+
+```{r}
+# wide to longer format with seperate Function
+gbd_wide %>%
+# same pivot_longer as before 
+pivot_longer(cols=matches("Female|Male"),
+names_to = "Gender_year",
+values_to = "deaths_millions") %>%
+separate(Gender_year, into = c("Gender", "year"), sep = "_", convert = FALSE)
+?separate
+
+```
+```{r}
+# sort as per deaths 
+gbd_wide %>%
+# same pivot_longer as before 
+pivot_longer(matches("Female|Male"),
+names_to = "Gender_year",
+values_to = "deaths_millions") %>%
+separate(Gender_year, into = c("Gender", "year"), sep = "_", convert = TRUE) %>% arrange(-deaths_millions) %>%
+# first 3 rows just for printing: 
+slice(1:3)
+```
+```{r}
+# lets start some data visualization
+library(tidyverse) 
+library("ggplot2")
+#install.packages("gapminder")
+library(gapminder)
+glimpse(gapminder)
+dim(gapminder)
+str(gapminder)
+class(gapminder)
+view(gapminder)
+```
+
+```{r}
+gapdata2007 <- gapminder %>% filter(year == 2007)
+gapdata2007
+```
+```{r}
+#aes() stands for aesthetics - things we can see
+gapdata2007 %>%
+ggplot(aes(x = gdpPercap, y = lifeExp))
+
+```
+```{r}
+plot=gapdata2007 %>%
+ggplot(aes(x = gdpPercap, y = lifeExp)) + geom_point()
+
+pdf(plot,file="plot.pdf")
+plot
+dev.off()
+```
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = continent, y = lifeExp)) + geom_point()
+```
+
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = gdpPercap, y = lifeExp, colour = continent)) + geom_point()
+```
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = gdpPercap, y = lifeExp, colour = 
+continent)) + geom_point(shape = 8)
+```
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = gdpPercap, y = lifeExp, colour = continent)) + geom_point(shape = 1) +
+facet_wrap(~continent)
+```
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = gdpPercap/1000, y = lifeExp, colour = continent)) + geom_point(shape = 1) +
+facet_wrap(~continent) +
+theme_bw()
+?theme_bw
+```
+```{r}
+gapminder %>%
+filter(country == "United Kingdom") %>% ggplot(aes(x = year, y = lifeExp)) + geom_line()
+```
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = continent, y = lifeExp)) + geom_boxplot()
+
+```
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = continent, y = lifeExp, colour = continent)) + geom_boxplot() +
+geom_jitter()
+# (4)
+
+```
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = continent, y = lifeExp)) + geom_boxplot() +
+geom_jitter(aes(colour = continent))
+```
+
+```{r}
+label_data <- gapdata2007 %>% group_by(continent) %>% filter(lifeExp == max(lifeExp)) %>% select(country, continent, lifeExp)
+ gapdata2007
+label_data
+```
+```{r}
+gapdata2007 %>%
+ggplot(aes(x = continent, y = lifeExp)) +
+# First geom - boxplot
+geom_boxplot() +
+# Second geom - jitter with its own aes(colour = )
+geom_jitter(aes(colour = continent)) +
+# Third geom - label, with its own dataset (label_data) and aes(label = )
+  geom_label(data = label_data, aes(label = country))
+```
+
+
+
