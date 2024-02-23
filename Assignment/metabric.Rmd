@@ -1,0 +1,92 @@
+---
+title: "Metabrick"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+library(tidyverse)
+## taken from 
+metabric <- read_csv("../metabric_sample_file.csv")
+colnames(metabric)
+metabric$Cancer_type
+```
+
+```{r}
+metabric %>% ggplot(aes(x = FOXA1, y = ESR1,colour = ER_status)) +
+  geom_point( )
+```
+```{r}
+
+metabric %>% ggplot(aes(x = FOXA1, y = ESR1,, shape = `3-gene_classifier`)) +
+geom_point(size = 0.9 )
+
+
+```
+```{r}
+colnames(metabric)
+
+metabric %>% ggplot(aes(x = FOXA1, y = ESR1,, color = `3-gene_classifier`)) +
+geom_point(size = 0.9 )
+
+metabric %>% ggplot(aes(x = FOXA1, y = ESR1,, colour = PAM50, shape = `3-gene_classifier`)) +
+geom_point(size = 0.9 )
+
+```
+```{r}
+metabric %>% ggplot(aes(x = ER_status, y = GATA3)) +
+  geom_boxplot()
+```
+
+```{r}
+metabric %>% ggplot(aes(x = ER_status, y = GATA3)) +
+  geom_boxplot() +
+  geom_point()
+```
+
+```{r}
+ggplot(data = metabric, mapping = aes(x = ER_status, y = GATA3)) +
+  geom_boxplot() +
+  geom_jitter()
+```
+
+```{r}
+ggplot(data = metabric, mapping = aes(x = ER_status, y = GATA3)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.3, size = 0.5, alpha = 0.25)
+```
+```{r}
+metabric %>% ggplot(aes(x = ER_status, y = GATA3, colour = HER2_status)) +
+  geom_boxplot()
+
+```
+```{r}
+
+library(ggpubr)
+compare_means(GATA3 ~ ER_status, data = metabric)
+p <- ggboxplot(metabric, x = "ER_status", y = "GATA3",
+          color = "ER_status", palette = "jco",
+          add = "jitter")
+#  Add p-value
+?stat_compare_means
+p + stat_compare_means()
+# Change method
+p + stat_compare_means(method = "t.test")
+
+p + stat_compare_means( aes(label = ..p.signif..), 
+                        label.x = 1.5, label.y = 14)
+
+
+
+```
+
